@@ -14,7 +14,23 @@ from utility import load_yaml_config, update_default_configs, print_color
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Train a GPT model.")
-    parser.add_argument('--config', type=str, default='config.yaml', help='Path to the YAML configuration file.')
+    parser.add_argument(
+        '--checkpoint', 
+        type=str,  
+        help='Specify the path to the checkpoint file.'
+    )
+    parser.add_argument(
+        '--device', 
+        type=str, 
+        default='gpu', 
+        help='Select the device for inference: "gpu" or "cpu".'
+    )
+    parser.add_argument(
+        '--start', 
+        type=str, 
+        default='\n', 
+        help='Specify the start of the prompt.'
+    )
     args = parser.parse_args()
 
     return args
@@ -34,10 +50,14 @@ config = {
 }
 
 args = parse_arguments()
-# Load and merge YAML configuration if provided
-yaml_config = load_yaml_config(args.config)
-config = update_default_configs(config, yaml_config)
+if args.device == 'gpu':
+    config['device'] = 'cuda'
+elif args.device == 'cpu':
+    config['device'] = 'cpu'
+else:
+    raise ValueError(f"Invalid device: {args.device}")
 
+config['start'] = args.start
 
 
 torch.manual_seed(config['seed'])
@@ -51,7 +71,7 @@ ctx = nullcontext() if device_type == 'cpu' else torch.amp.autocast(device_type=
 # model
 if config['init_from'] == 'resume':
     # init from a model saved in a specific directory
-    ckpt_path = os.path.join(config['out_dir'], 'ckpt.pt')
+    ckpt_path = args.checkpoint
     checkpoint = torch.load(ckpt_path, map_location=config['device'])
     gptconf = GPTConfig(**checkpoint['model_args'])
     model = GPT(gptconf)
@@ -91,11 +111,10 @@ else:
     decode = lambda l: enc.decode(l)
 
 # encode the beginning of the prompt
-if config['start'].startswith('FILE:'):
-    with open(config['start'][5:], 'r', encoding='utf-8') as f:
-        start = f.read()
 start_ids = encode(config['start'])
 x = (torch.tensor(start_ids, dtype=torch.long, device=config['device'])[None, ...])
+
+print(x)
 
 # run generation
 with torch.no_grad():

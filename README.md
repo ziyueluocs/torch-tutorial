@@ -305,66 +305,33 @@ python train_gpt.py --config=config/shakespear_char_cpu.yaml
 
 ## Sampling from the Trained Model
 
+### Case 1: From a Pre-trained Checkpoint
+
+Sample from the pre-trained model trained with one epoch:
 ```bash
-python sample.py --config=sample-config/shakespear_char_cpu.yaml
+python sample.py --checkpoint=out-one-epoch-shakespeare-char/ckpt.pt
 ```
 
-Sampling from the pre-trained model trained with one epoch
+Sample from the fully trained model:
 ```bash
-python sample.py --config=sample-config/shakespear_char_cpu_one_epoch.yaml
+python sample.py --checkpoint=out-shakespeare-char/ckpt.pt
 ```
 
-## Distributed Training
+### Case 2: From Your Own Saved Checkpoint
 
-To train the model using multiple GPUs, use the `torchrun` command.
-
-### Training on a Single Node
-
-To train the model on a single node with multiple GPUs:
-
+Specify the path to your own checkpoint file:
 ```bash
-torchrun --standalone \  # Indicates single-node training
-         --nproc_per_node=4 \  # Number of GPUs on the current node (4 in this example)
-         train_gpt.py \  # Training script
-         --config path/to/config.yaml  # Path to the configuration file
+python sample.py --checkpoint=path/to/your/checkpoint.pt
 ```
 
-In this example:
-- `--standalone` indicates that the training is performed on a single node.
-- `--nproc_per_node` specifies the number of GPUs to use on the current node.
+### Case 3: With Self-defined Start Prompt
 
-### Training on Multiple Nodes
+Use a custom starting prompt for text generation:
+```bash
+python sample.py --checkpoint=out-shakespeare-char/ckpt.pt --start="To be or not to be"
+```
 
-To train the model on multiple nodes, follow these steps:
-
-1. **Run on the First (Master) Node**:
-   
-   ```bash
-   torchrun --nproc_per_node=8 \  # Number of GPUs per node
-            --nnodes=2 \  # Total number of nodes used for training
-            --node_rank=0 \  # Rank of the master node
-            --master_addr=123.456.123.456 \  # IP address of the master node
-            --master_port=1234 \  # Port on the master node
-            train_gpt.py  # Training script
-            --config path/to/config.yaml  # Path to the configuration file
-   ```
-
-2. **Run on the Other Worker Nodes**:
-
-   Ensure the worker nodes can access the master node:
-
-   ```bash
-   torchrun --nproc_per_node=8 \  # Number of GPUs per node
-            --nnodes=2 \  # Total number of nodes used for training
-            --node_rank=1 \  # Rank of the worker node
-            --master_addr=123.456.123.456 \  # IP address of the master node
-            --master_port=1234 \  # Port on the master node
-            train_gpt.py  # Training script
-            --config path/to/config.yaml  # Path to the configuration file
-   ```
-
-In this example:
-- `--nnodes` indicates the total number of nodes used for training.
-- `--node_rank` denotes the unique rank of the node, which should be within the range [0, 1, ..., nnodes-1].
-- `--master_addr` and `--master_port` specify the IP address and port of the master node, respectively. All worker nodes should be able to connect to the master node using these details.
-
+You can also combine different options:
+```bash
+python sample.py --checkpoint=path/to/your/checkpoint.pt --start="Once upon a time" --device=cpu
+```

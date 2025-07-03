@@ -1,4 +1,0 @@
-# YAML config file for running the sampling
-
-out_dir: 'out-one-epoch-shakespeare-char'
-device: 'cpu'
