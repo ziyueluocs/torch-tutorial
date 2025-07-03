@@ -28,5 +28,6 @@ beta2: 0.99 # make a bit bigger because number of tokens per iter is small
 
 warmup_iters: 100 # not super necessary potentially
 
+compile: False
 num_epochs: 1
 # max_iters: 5000 # set max_iters will override num_epochs
