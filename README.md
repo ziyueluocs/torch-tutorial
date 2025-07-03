@@ -303,6 +303,12 @@ python data/shakespeare_char/prepare.py
 python train_gpt.py --config=config/shakespear_char_cpu.yaml
 ```
 
+## Training on GPU
+
+```bash
+python train_gpt.py --config=config/shakespear_char.yaml
+```
+
 ## Sampling from the Trained Model
 
 ### Case 1: From a Pre-trained Checkpoint
