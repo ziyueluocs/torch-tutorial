@@ -293,6 +293,8 @@ We will be training a GPT model on the shakespear-char dataset. The code is adap
 
 ## Preparing the data
 
+Ensure `pip install dataset==1.6.0`
+
 ```bash
 python data/shakespeare_char/prepare.py
 ```
